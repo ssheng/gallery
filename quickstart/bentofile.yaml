@@ -6,5 +6,5 @@ include:
 - "*.py"
 python:
   packages:
-    - scikit-learn
-    - pandas
+    - transformers
+    - torch

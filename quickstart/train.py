@@ -1,5 +1,5 @@
 import bentoml
-from sklearn import svm, datasets
+import transformers
 
 import logging
 
@@ -7,14 +7,9 @@ logging.basicConfig(level=logging.WARN)
 
 if __name__ == "__main__":
 
-    # Load training data
-    iris = datasets.load_iris()
-    X, y = iris.data, iris.target
-
-    # Model Training
-    clf = svm.SVC()
-    clf.fit(X, y)
+    generator = transformers.pipeline(task="fill-mask", model="julien-c/dummy-unknown")
+    print(generator("Today is a <mask> day"))
 
     # Save model to BentoML local model store
-    saved_model = bentoml.sklearn.save_model("iris_clf", clf)
+    saved_model = bentoml.transformers.save_model("fill-mask", generator)
     print(f"Model saved: {saved_model}")
