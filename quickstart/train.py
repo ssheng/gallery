@@ -2,10 +2,10 @@ import bentoml
 import transformers
 import logging
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, Pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForSequenceClassification, Pipeline, PreTrainedTokenizer
 from transformers.pipelines import SUPPORTED_TASKS
 
-logging.basicConfig(level=logging.WARN)
+logging.basicConfig(level=logging.INFO)
 
 class MyPipeline(Pipeline):
     def _sanitize_parameters(self, **kwargs):
@@ -15,6 +15,7 @@ class MyPipeline(Pipeline):
         return preprocess_kwargs, {}, {}
 
     def preprocess(self, text, maybe_arg=2):
+        print(text)
         input_ids = self.tokenizer(text, return_tensors='pt')
         return input_ids
 
@@ -23,25 +24,31 @@ class MyPipeline(Pipeline):
         return outputs
 
     def postprocess(self, model_outputs):
-        return model_outputs
+        return model_outputs["logits"].softmax(-1).numpy()
 
 if __name__ == "__main__":
-    SUPPORTED_TASKS["my-task"] = {
-        "impl": MyPipeline,
-        "tf": (),
-        "pt": (AutoModelForCausalLM,),
-        "default": {},
-        "type": "text",
-    }
+    # TASK_NAME = "my-classification-task"
+    # TASK_DEFINITION = {
+    #     "impl": MyPipeline,
+    #     "tf": (),
+    #     "pt": (AutoModelForSequenceClassification,),
+    #     "default": {},
+    #     "type": "text",
+    # }
+    # SUPPORTED_TASKS[TASK_NAME] = TASK_DEFINITION
 
-    # tokenizer = AutoTokenizer.from_pretrained("distilgpt2")
-    # model = AutoModelForCausalLM.from_pretrained("distilgpt2")
-    # generator = transformers.pipeline(task="my-task", model=model, tokenizer=tokenizer)
-    # print(generator("Gibraltar is a British Overseas Territory located at the southern tip of the Iberian Peninsula."))
+    # tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased-finetuned-sst-2-english")
+    # model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased-finetuned-sst-2-english")
+    # classifier = transformers.pipeline(task=TASK_NAME, model=model, tokenizer=tokenizer)
 
     # # Save model to BentoML local model store
-    # saved_model = bentoml.transformers.save_model("my-task", generator)
+    # saved_model = bentoml.transformers.save_model(TASK_NAME, pipeline=classifier, task_name=TASK_NAME, task_definition=TASK_DEFINITION)
     # print(f"Model saved: {saved_model}")
+    # print(saved_model("Gibraltar is a British Overseas Territory located at the southern tip of the Iberian Peninsula."))
 
-    generator = transformers.pipeline(task="my-task", model="/Users/ssheng/bentoml/models/my-task/dofzizxtusakscvj")
-    print(generator("Gibraltar is a British Overseas Territory located at the southern tip of the Iberian Peninsula."))
+    # generator = transformers.pipeline(task=TASK_NAME, model=f"/Users/ssheng/bentoml/models/{TASK_NAME}/6rkiutxug6e2qcvj")
+    # print(generator.task)
+    # print(generator("Gibraltar is a British Overseas Territory located at the southern tip of the Iberian Peninsula."))
+
+    pipeline = bentoml.transformers.load_model("my-classification-task:latest")
+    print(pipeline("Gibraltar is a British Overseas Territory located at the southern tip of the Iberian Peninsula."))
