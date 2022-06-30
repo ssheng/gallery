@@ -15,7 +15,6 @@ class MyPipeline(Pipeline):
         return preprocess_kwargs, {}, {}
 
     def preprocess(self, text, maybe_arg=2):
-        print(text)
         input_ids = self.tokenizer(text, return_tensors='pt')
         return input_ids
 
@@ -51,4 +50,11 @@ if __name__ == "__main__":
     # print(generator("Gibraltar is a British Overseas Territory located at the southern tip of the Iberian Peninsula."))
 
     pipeline = bentoml.transformers.load_model("my-classification-task:latest")
-    print(pipeline("Gibraltar is a British Overseas Territory located at the southern tip of the Iberian Peninsula."))
+    result = pipeline([
+        "BentoML: Create an ML Powered Prediction Service in Minutes via @TDataScience https://buff.ly/3srhTw9 #Python #MachineLearning #BentoML",
+        "Top MLOps Serving frameworks — 2021 https://link.medium.com/5Elq6Aw52ib #mlops #TritonInferenceServer #opensource #nvidia #machincelearning  #serving #tensorflow #PyTorch #Bodywork #BentoML #KFServing #kubeflow #Cortex #Seldon #Sagify #Syndicai",
+        "#MLFlow provides components for experimentation management, ML project management. #BentoML only focuses on serving and deploying trained models",
+        "2000 and beyond #OpenSource #bentoml",
+        "Model Serving Made Easy https://github.com/bentoml/BentoML ⭐ 1.1K #Python #Bentoml #BentoML #Modelserving #Modeldeployment #Modelmanagement #Mlplatform #Mlinfrastructure #Ml #Ai #Machinelearning #Awssagemaker #Awslambda #Azureml #Mlops #Aiops #Machinelearningoperations #Turn",
+    ])
+    print(result)
