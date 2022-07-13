@@ -6,5 +6,5 @@ include:
 - "*.py"
 python:
   packages:
-    - transformers
-    - torch
+  - transformers
+  - torch
